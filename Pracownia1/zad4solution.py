@@ -1,3 +1,7 @@
+# Opis:
+# Łatwo rozwiązywalne za pomocą sum prefiksowych
+# IMHO kod jest na tyle krótki i czytelny że nie będę się produkować
+
 file = open("zad4_input.txt")
 output = open("zad4_output.txt", 'w')
 

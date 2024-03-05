@@ -1,3 +1,10 @@
+# Opis rozwiązania:
+# Mamy tu DFS z dwoma argumentami: pierwszy to dotychczasowy wynik, drugi to pozostałe do rozpatrzenia literki
+# W każdym kroku DFS możemy literkę dokleić lub dokleić spację i literkę
+# Bardzo prosty Algorytm - niestety zbyt wolny
+# Można przyspieszyć wstawiając słownik w strukturę danych - np TRIE
+
+
 file = open("zad2_input.txt")
 output = open("zad2_output.txt", 'w')
 dict = open("words_for_ai1.txt")

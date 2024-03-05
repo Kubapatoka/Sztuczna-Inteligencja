@@ -1,3 +1,15 @@
+# Okropne zadanie
+# Dochodze BFS do mata
+# Teraz piekło - 4 dni nad tym kminiłem
+# Muszę się cofać i propagować odległość od mata (używając BFS) dopóki nie dojdę do stanu początkowego
+# z tego powodu mam dwie funkcje possible moves
+# Jedna odpowiada na pytanie: Do jakich stanów mogę dojść z stanu x
+# Druga odpowiada na pytanie: Z jakich stanów mogę dojść do x
+# Ogl to mi działa tylko trochę za wolno na sprawdzaczkę - testy 2 i 4 przechodzą
+# A dla testów 1,3,5 daje dobre wyniki tylko za późno
+
+
+
 # ilość pól: 64 (8x8)
 # w przybliżeniu mamy 64*64*64*2 stanów
 # co daje ~524 288 stanów

@@ -1,3 +1,18 @@
+# Opis rozwiązania:
+# W kodzie shardkodowane są talie dla obu graczy
+# losujemy 1000 rozdań
+# obliczamy kto wygrał
+# Obserwacja: jeśli Blotkarz uzyskał ten sam układ co Figurant to przegrał
+# każdemu układowi przyporządkowuje liczbę (im wyższy układ tym większa liczba)
+# Obserwacja: Poker Królewski jest nieosiągalny
+# W Komentarzu na dole pozostawiam przykładowe wyniki jakie uzyskałem
+
+
+
+
+
+
+
 # talia dla figuranta:
 
 #Pik, Kier, Karo, Trefl
