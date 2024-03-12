@@ -34,7 +34,7 @@ full_f = 4*npok(4,3)*3*npok(4,2)
 full = full_b*(r_tal_f-kar_f-full_f)
 
 #Kolor - Blotkarz ma kolor, Figurant nie ma miec karety i fula
-kol_b = npok(9,5)*4
+kol_b = npok(9,5)*4-20
 kolor = kol_b * (r_tal_f - kar_f - full_f)
 
 #Strit - Blotkarz ma strita (ale nie pokera), Figurant nie ma miec karety i fula
