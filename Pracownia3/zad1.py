@@ -23,6 +23,8 @@ import copy
 # Opis wejścia: wysokość - h, szerokość - w
 # wiadomo
 
+#Kopia z P1
+
 class field:
     is_white = False
     is_black = False
@@ -34,6 +36,8 @@ class field:
             self.non_copy_constructor()
         else:
             self.copy_constructor(orig)
+    def __eq__(self, other):
+        return self.is_black == other.is_black and self.is_white == other.is_white()
     def non_copy_constructor(self):
         self.is_white = False
         self.is_black = False
@@ -130,7 +134,6 @@ def dopasuj(dane, bcpy):
 
 
 
-
 input = open("zad_input.txt")
 output = open("zad_output.txt", 'w')
 
@@ -215,6 +218,6 @@ while True:
 for row in board:
     row_str = map(lambda f : char(f),  row)
     res = ''.join(row_str)
-    print(res)
+    #print(res)
     output.write(res)
     output.write('\n')

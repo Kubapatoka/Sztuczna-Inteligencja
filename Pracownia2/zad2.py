@@ -110,7 +110,7 @@ while len(queue) != 0:
 
     if win(curr):
         output.write(path)
-        # print(path)
+        print(path)
         break
 
     queue.append((ruch(curr, 'U'), path+'U'))
