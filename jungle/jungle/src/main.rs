@@ -1114,13 +1114,178 @@ fn agent_2(p1 : Pionki, p2 : Pionki) -> (i8, i8, i8, i8)
 {
     let moves = move_generator(p1, p2);
 
-    let no_ve_elems = moves.len();
-    let idx = rand::random::<usize>()%no_ve_elems;
+    let mut best_move = moves[0];
+    let mut best_res = -1;
 
-    return moves[idx];
+    for m in moves
+    {
+        let mut np1 = p1;
+        let mut np2 = p2;
+
+        (np1, np2) = do_move(np1,np2, m);
+
+        let res = minimax(np2, np1, 10, false, -1000000, 1000000);
+        if res > best_res
+        {
+            best_res = res;
+            best_move = m;
+        }
+   }
+   
+    return best_move;
 }
 
-fn _draw(p1 : Pionki, p2 : Pionki)
+fn minimax(p1: Pionki, p2:Pionki, depth:i32, is_maximizing_player : bool, mut alpha : i32, mut beta: i32) -> i32
+{
+    if depth == 0 || p1.is_empty_pt(&p2.cave) || p2.is_empty_pt(&p1.cave)
+    {
+        if is_maximizing_player
+        {
+            return heuristic(p1, p2);
+        }
+        return heuristic(p2, p1);
+    }
+
+    if is_maximizing_player
+    {
+        let moves = move_generator(p1, p2);
+        for m in moves
+        {
+            let mut np1 = p1;
+            let mut np2 = p2;
+
+            (np1, np2) = do_move(np1,np2, m);
+            let value = minimax(np2, np1, depth-1, !is_maximizing_player, alpha, beta);
+            alpha = std::cmp::max( alpha, value);
+            if beta <= alpha
+            {
+                break;
+            }
+        }
+        return alpha;
+    }
+    else
+    {
+        let moves = move_generator(p1, p2);
+        for m in moves
+        {
+            let mut np1 = p1;
+            let mut np2 = p2;
+
+            (np1, np2) = do_move(np1,np2, m);
+
+            let value = minimax(np2, np1, depth-1, !is_maximizing_player, alpha, beta);
+            beta = std::cmp::min( beta, value);
+            if beta <= alpha
+            {
+                break;
+            }
+        }
+        return beta;
+    }
+}
+
+fn heuristic(p1 : Pionki, p2 : Pionki) -> i32
+{
+    let mut res = 0;
+    if p1.rat.is_some()
+    {
+        res += 10;
+    }
+
+    if p1.cat.is_some()
+    {
+        res += 10;
+    }
+
+    if p1.dog.is_some()
+    {
+        res += 15;
+    }
+
+    if p1.wolf.is_some()
+    {
+        res += 20;
+    }
+
+    if p1.panther.is_some()
+    {
+        res += 25;
+    }
+
+    if p1.tiger.is_some()
+    {
+        res += 30;
+    }
+
+    if p1.lion.is_some()
+    {
+        res += 35;
+    }
+
+    if p1.elephant.is_some()
+    {
+        res += 35;
+    }
+
+    if p2.rat.is_some()
+    {
+        res -= 10;
+    }
+
+    if p2.cat.is_some()
+    {
+        res -= 10;
+    }
+
+    if p2.dog.is_some()
+    {
+        res -= 15;
+    }
+
+    if p2.wolf.is_some()
+    {
+        res -= 20;
+    }
+
+    if p2.panther.is_some()
+    {
+        res -= 25;
+    }
+
+    if p2.tiger.is_some()
+    {
+        res -= 30;
+    }
+
+    if p2.lion.is_some()
+    {
+        res -= 35;
+    }
+
+    if p2.elephant.is_some()
+    {
+        res -= 35;
+    }
+
+    if !p1.is_empty_pt(&p2.cave)
+    {
+        res += 300;
+    }
+
+    if !p2.is_empty_pt(&p1.cave)
+    {
+        res -= 300;
+    }
+
+
+    
+    return res;
+
+
+}
+
+fn draw(p1 : Pionki, p2 : Pionki)
 {
     let mut board: Vec<Vec<_>> = Vec::new();
     board.push("..#*#..".chars().collect::<Vec<_>>());
@@ -1273,7 +1438,7 @@ fn game() -> bool
             if !p1.is_empty_pt(&p2.cave)
             {
                 println!("Player 1 wins");
-                // draw(p1, p2);
+                draw(p1, p2);
                 return true;
             }
         }
