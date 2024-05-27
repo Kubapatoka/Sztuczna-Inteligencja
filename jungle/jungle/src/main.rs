@@ -10,6 +10,7 @@
 //...#...
 //..#*#..
 
+
 #[derive(Copy, Clone)]
 struct Pt
 {
@@ -1066,6 +1067,7 @@ fn agent_1(p1 : Pionki, p2 : Pionki) -> (i8, i8, i8, i8)
         }
    }
    
+    // println!("Agent1, {}, {}, {}, {}", best_move.0, best_move.1, best_move.2, best_move.3);
     return best_move;
 }
 
@@ -1115,7 +1117,9 @@ fn agent_2(p1 : Pionki, p2 : Pionki) -> (i8, i8, i8, i8)
     let moves = move_generator(p1, p2);
 
     let mut best_move = moves[0];
-    let mut best_res = -1;
+    let mut best_res = -1000000;
+
+    let no_mo = moves.len();
 
     for m in moves
     {
@@ -1124,26 +1128,41 @@ fn agent_2(p1 : Pionki, p2 : Pionki) -> (i8, i8, i8, i8)
 
         (np1, np2) = do_move(np1,np2, m);
 
-        let res = minimax(np2, np1, 10, false, -1000000, 1000000);
+        //let alpha = -10000;
+        //let beta = 10000;
+        let (res, _, _) = minimax(np2, np1, 30, false, -10000, 10000);
+
         if res > best_res
         {
             best_res = res;
             best_move = m;
         }
+        else if res == best_res
+        {
+            let can_get = rand::random::<bool>();
+            if can_get
+            {
+                best_res = res;
+                best_move = m;
+            }
+
+        }
    }
    
-    return best_move;
+// println!("Agent2 no_mo {}, {}, {}, {}, {}", no_mo, best_move.0, best_move.1, best_move.2, best_move.3);
+   
+   return best_move;
 }
 
-fn minimax(p1: Pionki, p2:Pionki, depth:i32, is_maximizing_player : bool, mut alpha : i32, mut beta: i32) -> i32
+fn minimax(p1: Pionki, p2:Pionki, depth:i32, is_maximizing_player : bool, mut alpha : i32,  mut beta:i32) -> (i32, i32, i32)
 {
     if depth == 0 || p1.is_empty_pt(&p2.cave) || p2.is_empty_pt(&p1.cave)
     {
         if is_maximizing_player
         {
-            return heuristic(p1, p2);
+            return (heuristic(p1, p2), alpha, beta);
         }
-        return heuristic(p2, p1);
+        return (heuristic(p2, p1), alpha, beta);
     }
 
     if is_maximizing_player
@@ -1156,13 +1175,13 @@ fn minimax(p1: Pionki, p2:Pionki, depth:i32, is_maximizing_player : bool, mut al
 
             (np1, np2) = do_move(np1,np2, m);
             let value = minimax(np2, np1, depth-1, !is_maximizing_player, alpha, beta);
-            alpha = std::cmp::max( alpha, value);
+            alpha = std::cmp::max( alpha, value.0);
             if beta <= alpha
             {
                 break;
             }
         }
-        return alpha;
+        return (alpha,alpha,beta);
     }
     else
     {
@@ -1175,13 +1194,13 @@ fn minimax(p1: Pionki, p2:Pionki, depth:i32, is_maximizing_player : bool, mut al
             (np1, np2) = do_move(np1,np2, m);
 
             let value = minimax(np2, np1, depth-1, !is_maximizing_player, alpha, beta);
-            beta = std::cmp::min( beta, value);
+            beta = std::cmp::min( beta, value.0);
             if beta <= alpha
             {
                 break;
             }
         }
-        return beta;
+        return (beta,alpha, beta);
     }
 }
 
@@ -1230,17 +1249,17 @@ fn heuristic(p1 : Pionki, p2 : Pionki) -> i32
 
     if p2.rat.is_some()
     {
-        res -= 10;
+        res -= 20;
     }
 
     if p2.cat.is_some()
     {
-        res -= 10;
+        res -= 20;
     }
 
     if p2.dog.is_some()
     {
-        res -= 15;
+        res -= 20;
     }
 
     if p2.wolf.is_some()
@@ -1270,20 +1289,82 @@ fn heuristic(p1 : Pionki, p2 : Pionki) -> i32
 
     if !p1.is_empty_pt(&p2.cave)
     {
-        res += 300;
+        res += 900;
     }
 
     if !p2.is_empty_pt(&p1.cave)
     {
-        res -= 300;
+        res -= 900;
     }
 
+    if p1.cave.y == 0
+    {
+        if !p1.is_empty_pt(&Pt{x: 2, y: 8})
+        {
+            res += 50;
+        }
 
+        if !p1.is_empty_pt(&Pt{x: 4, y: 8})
+        {
+            res += 50;
+        }
+
+        if !p1.is_empty_pt(&Pt{x: 3, y: 7})
+        {
+            res += 50;
+        }
+    }
+    else 
+    {
+        if !p1.is_empty_pt(&Pt{x: 2, y: 0})
+        {
+            res += 50;
+        }
+
+        if !p1.is_empty_pt(&Pt{x: 4, y: 0})
+        {
+            res += 50;
+        }
+
+        if !p1.is_empty_pt(&Pt{x: 3, y: 1})
+        {
+            res += 50;
+        }
+    }
+
+    if p1.cave.y == 0
+    {
+        if !p1.is_empty_pt(&Pt{x:1, y:0}) { res += 5;}
+        if !p1.is_empty_pt(&Pt{x:5, y:0}) { res += 5;}
+        if !p1.is_empty_pt(&Pt{x:2, y:1}) { res += 8;}
+        if !p1.is_empty_pt(&Pt{x:4, y:1}) { res += 8;}
+        if !p1.is_empty_pt(&Pt{x:3, y:2}) { res += 9;}
+    }
+    else 
+    {
+        if !p1.is_empty_pt(&Pt{x:1, y:8}) { res += 5;}
+        if !p1.is_empty_pt(&Pt{x:5, y:8}) { res += 5;}
+        if !p1.is_empty_pt(&Pt{x:2, y:7}) { res += 8;}
+        if !p1.is_empty_pt(&Pt{x:4, y:7}) { res += 8;}
+        if !p1.is_empty_pt(&Pt{x:3, y:6}) { res += 9;}
+    }
     
     return res;
 
 
 }
+
+//0123456
+//..#*#..0
+//...#...1
+//.......2
+//.~~.~~.3
+//.~~.~~.4
+//.~~.~~.5
+//.......6
+//...#...7
+//..#*#..8
+
 
 fn draw(p1 : Pionki, p2 : Pionki)
 {
@@ -1437,8 +1518,8 @@ fn game() -> bool
 
             if !p1.is_empty_pt(&p2.cave)
             {
-                println!("Player 1 wins");
-                draw(p1, p2);
+                //println!("Player 1 wins");
+                //draw(p1, p2);
                 return true;
             }
         }
@@ -1449,8 +1530,8 @@ fn game() -> bool
 
             if !p2.is_empty_pt(&p1.cave)
             {
-                println!("Player 2 wins");
-                // draw(p1, p2);
+                //println!("Player 2 wins");
+                //draw(p1, p2);
                 return false;
             }
         }
@@ -1477,7 +1558,8 @@ fn main() {
         else {
             res2 += 1;
         }
+        println!("Player 1 wins: {}, Player 2 wins: {}", res1, res2 );
     }
 
-    println!("Player 1 wins: {}, Player 2 wins: {}", res1, res2 );
+    // println!("Player 1 wins: {}, Player 2 wins: {}", res1, res2 );
 }
