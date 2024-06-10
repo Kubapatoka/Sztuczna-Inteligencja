@@ -1,5 +1,3 @@
-extern crate rand;
-use rand::Rng;
 use std::fs;
 
 
@@ -192,8 +190,8 @@ fn fit(mut board: Vec<Vec<Field>>, rows : Vec<Vec<Vec<char>>>, cols : Vec<Vec<Ve
 
 fn main() 
 {
-    let input_file_path = "/home/jakub/Desktop/SI/nonograms/nonogram_solver/zad_input.txt";
-    let output_file_path = "/home/jakub/Desktop/SI/nonograms/nonogram_solver/zad_output.txt";
+    let input_file_path = "/home/jakub/Desktop/SI/nonograms_v2/nonogram_solver/zad_input.txt";
+    let output_file_path = "/home/jakub/Desktop/SI/nonograms_v2/nonogram_solver/zad_output.txt";
     
     let content = fs::read_to_string(input_file_path)
         .expect("I am not able to read this file").split('\n')
@@ -313,92 +311,139 @@ fn main()
 
 fn bt(board: Vec<Vec<Field>>, rows: Vec<Vec<Vec<char>>>, cols: Vec<Vec<Vec<char>>>) -> Option<Vec<Vec<Field>>> 
 {
-    let h = board.len();
-    let w = board[0].len();
-
     // println!("\n");
     // _wypisz(board.clone());
 
-    loop
-    {
-        let mut rng = rand::thread_rng();
-        let h1 = rng.gen_range(0..h);
-        let w1 = rng.gen_range(0..w);
+    let h = board.len();
+    let w = board[0].len();
 
-        if board[h1][w1].is_black == true || board[h1][w1].is_white == true
+    let mut is_row = true;
+    let mut mozliwosci_l = 1000000000;
+    let mut mozliwosci = vec![];
+    let mut rzad = 0;
+
+    for i in 0..h
+    {
+        let mut valid_options = rows[i].clone();
+        valid_options = valid_options.iter()
+                                    .filter(|p| is_option_fit_row(board[i].clone(), p) )
+                                    .map(|x| x.clone())
+                                    .collect::<Vec<Vec<char>>>();
+
+        let len_val_opt = valid_options.len();
+
+        if len_val_opt > 1 && len_val_opt < mozliwosci_l
+        //if  len_val_opt < mozliwosci_l
         {
-            continue;
+            mozliwosci_l = len_val_opt;
+            rzad = i;
+            mozliwosci = valid_options.clone();
+        }
+    }
+
+    for j in 0..w
+    {
+        let mut col = [].to_vec();
+        for i in 0..h
+        {
+            col.push(board[i][j]);
         }
 
-        let mut nb = board.clone();
+        let mut valid_options = cols[j].clone();
+        valid_options = valid_options.iter()
+                                    .filter(|p| is_option_fit_row(col.clone(), p) )
+                                    .map(|x| x.clone())
+                                    .collect::<Vec<Vec<char>>>();
 
-        nb[h1][w1].is_black = true;
+        let len_val_opt = valid_options.len();
+
+        if len_val_opt > 1 && len_val_opt < mozliwosci_l
+        //if  len_val_opt < mozliwosci_l
+        {
+            mozliwosci_l = len_val_opt;
+            rzad = j;
+            mozliwosci = valid_options.clone();
+            is_row = false;
+        }
+    }
+
+    // println!("\nliczba mozliwosci: {}, wiersz:{}, nr: {}", mozliwosci_l, is_row, rzad);
+
+    for i in 0..mozliwosci_l
+    {
+        let mut nb = board.clone();
+        let mo = mozliwosci[i].clone();
+        if is_row
+        {
+            for j in 0..w
+            {
+                if mo[j] == '#'
+                {
+                    nb[rzad][j].is_black = true;
+                }
+                else
+                {
+                    nb[rzad][j].is_white = true;
+                }
+            }
+        }
+        else
+        {
+            for j in 0..h
+            {
+                if mo[j] == '#'
+                {
+                    nb[j][rzad].is_black = true;
+                }
+                else
+                {
+                    nb[j][rzad].is_white = true;
+                }
+            }
+        }
+
         let mut is_the_same = false;
-        let mut is_black_good = true;
+        let mut next_var = false;
         while !is_the_same
         {
             let old_board = nb.clone();
+    
             let res = fit(nb.clone(), rows.clone(), cols.clone());
+
             if res.is_none()
             {
-                is_black_good = false;
+                next_var = true;
                 break;
             }
+            else 
+            {
+                nb = res.unwrap();
+            }
 
-            nb = res.unwrap();
-    
             is_the_same = compare_boards(old_board.clone(), nb.clone());
             if is_the_same{ break; }
         }
 
-        if is_not_finished(nb.clone()) && is_black_good
+        if next_var
         {
-            let nb_opt = bt(nb.clone(), rows.clone(), cols.clone());
-
-            if nb_opt.is_some()
-            {
-                return nb_opt;
-            }
-        }
-
-        if !is_not_finished(nb.clone())
-        {
-            return Some(nb);
-        }
-
-        nb = board.clone();
-        nb[h1][w1].is_white = true;
-
-        is_the_same = false;
-        while !is_the_same
-        {
-            let old_board = nb.clone();
-            let res = fit(nb, rows.clone(), cols.clone());
-            if res.is_none()
-            {
-                return None;
-            }
-
-            nb = res.unwrap();
-    
-            is_the_same = compare_boards(old_board.clone(), nb.clone());
+            continue;
         }
 
         if is_not_finished(nb.clone())
         {
             let res = bt(nb.clone(), rows.clone(), cols.clone());
-            return res;
-            // if res.is_some()
-            // {
-            //     return res;
-            // }
-        }
 
-        if !is_not_finished(nb.clone())
+            if res.is_some()
+            {
+                return res;
+            }
+        }
+        else 
         {
             return Some(nb);
         }
     }
+    None
 }
 
 fn is_not_finished(board: Vec<Vec<Field>>) -> bool {
